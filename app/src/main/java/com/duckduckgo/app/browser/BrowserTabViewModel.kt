@@ -54,6 +54,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteInAppMessageSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
+import com.duckduckgo.app.browser.BrowserWebViewClient.WebViewResizer
 import com.duckduckgo.app.browser.LongPressHandler.RequiredAction
 import com.duckduckgo.app.browser.SSLErrorType.EXPIRED
 import com.duckduckgo.app.browser.SSLErrorType.GENERIC
@@ -629,8 +630,10 @@ class BrowserTabViewModel @Inject constructor(
     fun registerWebViewListener(
         browserWebViewClient: BrowserWebViewClient,
         browserChromeClient: BrowserChromeClient,
+        onPageFinished: () -> Unit,
     ) {
         browserWebViewClient.webViewClientListener = this
+        browserWebViewClient.onPageFinishedListener = onPageFinished
         browserChromeClient.webViewClientListener = this
     }
 

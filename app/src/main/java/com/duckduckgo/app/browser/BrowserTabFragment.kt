@@ -62,6 +62,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -123,6 +124,7 @@ import com.duckduckgo.app.browser.model.BasicAuthenticationRequest
 import com.duckduckgo.app.browser.model.LongPressTarget
 import com.duckduckgo.app.browser.newtab.FocusedViewProvider
 import com.duckduckgo.app.browser.newtab.NewTabPageProvider
+import com.duckduckgo.app.browser.omnibar.BottomAppBarBehavior
 import com.duckduckgo.app.browser.omnibar.Omnibar
 import com.duckduckgo.app.browser.omnibar.OmnibarScrolling
 import com.duckduckgo.app.browser.omnibar.animations.BrowserTrackersAnimatorHelper
@@ -843,7 +845,42 @@ class BrowserTabFragment :
         configurePrivacyShield()
         configureWebView()
         configureSwipeRefresh()
-        viewModel.registerWebViewListener(webViewClient, webChromeClient)
+        viewModel.registerWebViewListener(
+            browserWebViewClient = webViewClient,
+            browserChromeClient = webChromeClient,
+            onPageFinished = {
+                val height = webView!!.computeVerticalScrollRange()
+                if (height != 0) {
+                    if (
+                        height >
+                            binding.rootView.height - binding.bottomToolbarInclude.root.height &&
+                            height <= binding.rootView.height
+                    ) {
+                        binding.bottomToolbarInclude.appBarLayout.updateLayoutParams<
+                            CoordinatorLayout.LayoutParams
+                        > {
+                            (behavior as BottomAppBarBehavior).apply {
+                                animateToolbarVisibility(
+                                    binding.bottomToolbarInclude.appBarLayout,
+                                    true,
+                                )
+                            }
+                            behavior = null
+                        }
+                        webViewContainer.updatePadding(
+                            bottom = binding.bottomToolbarInclude.root.height
+                        )
+                    } else {
+                        webViewContainer.updatePadding(bottom = 0)
+                        binding.bottomToolbarInclude.appBarLayout.updateLayoutParams<
+                            CoordinatorLayout.LayoutParams
+                        > {
+                            behavior = BottomAppBarBehavior<View>(requireContext(), null)
+                        }
+                    }
+                }
+            },
+        )
         configureOmnibarTextInput()
         configureFindInPage()
         configureAutoComplete()
