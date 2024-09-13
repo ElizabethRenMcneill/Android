@@ -49,6 +49,9 @@ interface VpnRemoteFeatures {
     @DefaultValue(false)
     @InternalAlwaysEnabled
     fun showExcludeAppPrompt(): Toggle // kill switch
+
+    @DefaultValue(true)
+    fun allowAutoExcludeBrokenApps(): Toggle // kill switch
 }
 
 @ContributesBinding(AppScope::class)
