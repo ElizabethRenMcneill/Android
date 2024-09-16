@@ -20,13 +20,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
-import androidx.lifecycle.LifecycleOwner
 import com.duckduckgo.app.di.AppCoroutineScope
-import com.duckduckgo.app.lifecycle.MainProcessLifecycleObserver
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
 import com.duckduckgo.installation.impl.installer.InstallationPixelName.APP_INSTALLER_PACKAGE_NAME
+import com.duckduckgo.privacy.config.api.PrivacyConfigCallbackPlugin
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dagger.SingleInstanceIn
 import javax.inject.Inject
@@ -36,24 +35,22 @@ import timber.log.Timber
 
 @ContributesMultibinding(
     scope = AppScope::class,
-    boundType = MainProcessLifecycleObserver::class,
+    boundType = PrivacyConfigCallbackPlugin::class,
 )
 @SingleInstanceIn(AppScope::class)
-class InstallSourceLifecycleObserver @Inject constructor(
+class InstallSourcePrivacyConfigObserver @Inject constructor(
     private val installSourceExtractor: InstallSourceExtractor,
     private val context: Context,
     private val pixel: Pixel,
     private val dispatchers: DispatcherProvider,
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
-) : MainProcessLifecycleObserver {
+) : PrivacyConfigCallbackPlugin {
 
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences(SHARED_PREFERENCES_FILENAME, Context.MODE_PRIVATE)
     }
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-
+    override fun onPrivacyConfigDownloaded() {
         appCoroutineScope.launch(dispatchers.io()) {
             if (!hasAlreadyProcessed()) {
                 val installationSource = installSourceExtractor.extract()
