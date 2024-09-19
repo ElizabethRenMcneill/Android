@@ -488,6 +488,12 @@ open class BrowserActivity : DuckDuckGoActivity() {
         }
     }
 
+    fun openExistingTab(tabId: String) {
+        lifecycleScope.launch {
+            viewModel.onTabSelected(tabId)
+        }
+    }
+
     fun launchSettings() {
         startActivity(SettingsActivity.intent(this))
     }
