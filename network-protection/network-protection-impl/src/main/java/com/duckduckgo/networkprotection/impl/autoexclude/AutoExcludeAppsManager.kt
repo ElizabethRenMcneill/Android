@@ -26,6 +26,8 @@ interface AutoExcludeAppsManager {
 
     fun markAppAsShown(app: FlaggedApp)
 
+    fun isAppMarkedAsNotCompatible(appPackage: String): Boolean
+
     data class FlaggedApp(
         val appPackage: String,
         val appName: String,
@@ -42,5 +44,13 @@ class RealAutoExcludeAppsManager @Inject constructor() : AutoExcludeAppsManager 
     }
 
     override fun markAppAsShown(app: FlaggedApp) {
+    }
+
+    override fun isAppMarkedAsNotCompatible(appPackage: String): Boolean {
+        return when (appPackage) {
+            "com.openai.chatgpt" -> true
+            "com.google.android.projection.gearhead" -> true
+            else -> false
+        }
     }
 }
