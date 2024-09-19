@@ -87,8 +87,8 @@
     <string name="netpManagementManageItemExclusion">Excluded Apps</string>
     <string name="netpManagementManageItemExclusionSubtitleEmpty">None</string>
     <plurals name="netpManagementManageItemExclusionSubtitleAppCount">
-        <item quantity="one" instruction="Placeholder is a number">%1$d app</item>
-        <item quantity="other" instruction="Placeholder is a number">%1$d apps</item>
+        <item instruction="Placeholder is a number" quantity="one">%1$d app</item>
+        <item instruction="Placeholder is a number" quantity="other">%1$d apps</item>
     </plurals>
     <string name="netpManagementVpnSettings">VPN Settings</string>
 
@@ -231,4 +231,11 @@
     <string name="netpCustomDnsPrivateDnsWarning">Private DNS is already specified in System DNS Settings. Turn off Private DNS to set a custom DNS for DuckDuckGo VPN. <annotation type="open_settings_link">Open System Settings</annotation></string>
     <string name="netpCustomDnsWarning">Using a custom DNS server can impact browsing speeds and expose your activity to third parties if the server isn\'t secure or reliable.</string>
     <string name="netpDdgDnsByLine">DuckDuckGo routes DNS queries through our DNS servers so your internet provider can\'t see what websites you visit.</string>
+
+    <!-- Auto-exclude -->
+    <string name="netpAutoExcludePromptTitle">Would you like to exclude apps that are not compatible with VPNs?</string>
+    <string name="netpAutoExcludePromptMessage">We found 2 new apps that are not compatible with VPNs. Exclude these apps to use them while the VPN is connected.</string>
+    <string name="netpAutoExcludePromptOptionEnable">Add incompatible apps automatically</string>
+    <string name="netpAutoExcludePromptActionAdd">Add exclusions</string>
+    <string name="netpAutoExcludePromptActionCancel">Not now</string>
 </resources>
