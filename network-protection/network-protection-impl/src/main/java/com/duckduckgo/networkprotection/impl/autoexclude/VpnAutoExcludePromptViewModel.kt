@@ -21,7 +21,9 @@ import androidx.lifecycle.viewModelScope
 import com.duckduckgo.anvil.annotations.ContributesViewModel
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.networkprotection.impl.autoexclude.AutoExcludeAppsManager.FlaggedApp
+import com.duckduckgo.networkprotection.impl.autoexclude.AutoExcludeAppsManager.IncompatibleApp
+import com.duckduckgo.networkprotection.impl.autoexclude.VpnAutoExcludePromptFragment.Companion.Trigger
+import com.duckduckgo.networkprotection.impl.autoexclude.VpnAutoExcludePromptFragment.Companion.Trigger.NEW_FLAGGED_APP
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,11 +37,15 @@ class VpnAutoExcludePromptViewModel @Inject constructor(
 ) : ViewModel() {
     private val _viewState = MutableStateFlow<ViewState>(ViewState(emptyList()))
 
-    fun onPromptShown() {
+    fun onPromptShown(trigger: Trigger) {
         viewModelScope.launch(dispatcherProvider.io()) {
             _viewState.emit(
                 ViewState(
-                    flaggedApps = autoExcludeAppsManager.getFlaggedApps(),
+                    incompatibleApps = if (trigger == NEW_FLAGGED_APP) {
+                        autoExcludeAppsManager.getFlaggedApps()
+                    } else {
+                        autoExcludeAppsManager.getAllInstalledProtectedIncompatibleApps()
+                    },
                 ),
             )
         }
@@ -54,6 +60,6 @@ class VpnAutoExcludePromptViewModel @Inject constructor(
     }
 
     data class ViewState(
-        val flaggedApps: List<FlaggedApp>,
+        val incompatibleApps: List<IncompatibleApp>,
     )
 }

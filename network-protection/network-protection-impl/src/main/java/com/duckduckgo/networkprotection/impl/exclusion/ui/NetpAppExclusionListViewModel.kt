@@ -42,6 +42,7 @@ import com.duckduckgo.networkprotection.impl.exclusion.ui.AppsProtectionType.Fil
 import com.duckduckgo.networkprotection.impl.exclusion.ui.AppsProtectionType.HeaderType
 import com.duckduckgo.networkprotection.impl.exclusion.ui.AppsProtectionType.SystemAppCategoryType
 import com.duckduckgo.networkprotection.impl.exclusion.ui.AppsProtectionType.SystemAppHeaderType
+import com.duckduckgo.networkprotection.impl.exclusion.ui.Command.ShowAutoExcludePrompt
 import com.duckduckgo.networkprotection.impl.exclusion.ui.Command.ShowUnifiedPproAppFeedback
 import com.duckduckgo.networkprotection.impl.exclusion.ui.Command.ShowUnifiedPproFeedback
 import com.duckduckgo.networkprotection.impl.exclusion.ui.HeaderContent.DEFAULT
@@ -319,6 +320,14 @@ class NetpAppExclusionListViewModel @Inject constructor(
             } else {
                 networkProtectionPixels.reportSkippedReportAfterExcludingApp()
             }
+
+            if (vpnRemoteFeatures.allowAutoExcludeBrokenApps().isEnabled() && !localConfig.autoExcludeBrokenApps().isEnabled()) {
+                if (autoExcludeAppsManager.isAppMarkedAsNotCompatible(packageName) &&
+                    autoExcludeAppsManager.getAllInstalledProtectedIncompatibleApps().isNotEmpty()
+                ) {
+                    command.send(ShowAutoExcludePrompt)
+                }
+            }
         }
     }
 
@@ -413,6 +422,7 @@ internal sealed class Command {
 
     data class ShowDisableProtectionDialog(val forApp: NetpExclusionListApp) : Command()
     data class ShowSystemAppsExclusionWarning(val category: NetpExclusionListSystemAppCategory) : Command()
+    data object ShowAutoExcludePrompt : Command()
 }
 
 sealed class AppsProtectionType {

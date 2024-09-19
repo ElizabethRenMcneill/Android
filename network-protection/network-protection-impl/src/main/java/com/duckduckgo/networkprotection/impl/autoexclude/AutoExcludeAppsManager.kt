@@ -17,40 +17,77 @@
 package com.duckduckgo.networkprotection.impl.autoexclude
 
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.networkprotection.impl.autoexclude.AutoExcludeAppsManager.FlaggedApp
+import com.duckduckgo.networkprotection.impl.autoexclude.AutoExcludeAppsManager.IncompatibleApp
+import com.duckduckgo.networkprotection.store.NetPExclusionListRepository
 import com.squareup.anvil.annotations.ContributesBinding
 import javax.inject.Inject
 
 interface AutoExcludeAppsManager {
-    suspend fun getFlaggedApps(): List<FlaggedApp>
+    /**
+     * Returns a list of apps that has been flagged for auto exclude.
+     * An app can only be flagged once.
+     * An installed app will be flagged if it is part of the auto exclude list and is not part of the user's exclusion list.
+     */
+    suspend fun getFlaggedApps(): List<IncompatibleApp>
 
-    fun markAppAsShown(app: FlaggedApp)
+    /**
+     * Marks an app that has been flagged by auto exclude as shown.
+     * An app can only be flagged / shown in auto-exclude prompt ONLY once.
+     */
+    fun markAppAsFlagged(app: IncompatibleApp)
 
+    /**
+     * Returns a list of apps that is installed on this device and is part of the auto exclude list
+     */
+    suspend fun getAllInstalledIncompatibleApps(): List<IncompatibleApp>
+
+    /**
+     * Returns a list of apps that is installed on this device and is part of the auto exclude list
+     * And is currently NOT part of the user's exclusion list.
+     */
+    suspend fun getAllInstalledProtectedIncompatibleApps(): List<IncompatibleApp>
+
+    /**
+     * Returns if the app is part of the auto exclude list
+     */
     fun isAppMarkedAsNotCompatible(appPackage: String): Boolean
 
-    data class FlaggedApp(
+    data class IncompatibleApp(
         val appPackage: String,
         val appName: String,
     )
 }
 
 @ContributesBinding(AppScope::class)
-class RealAutoExcludeAppsManager @Inject constructor() : AutoExcludeAppsManager {
-    override suspend fun getFlaggedApps(): List<FlaggedApp> {
-        return listOf(
-            FlaggedApp(appPackage = "com.openai.chatgpt", appName = "ChatGPT"),
-            FlaggedApp(appPackage = "com.google.android.projection.gearhead", appName = "Android Auto"),
-        )
+class RealAutoExcludeAppsManager @Inject constructor(
+    private val netPExclusionListRepository: NetPExclusionListRepository,
+) : AutoExcludeAppsManager {
+    private val mockAutoExcludeMap = mapOf(
+        IncompatibleApp(appPackage = "com.google.android.projection.gearhead", appName = "Android Auto") to false,
+        IncompatibleApp(appPackage = "com.ivuu", appName = "AlfredCamera") to true,
+        IncompatibleApp(appPackage = "com.openai.chatgpt", appName = "ChatGPT") to false,
+    )
+
+    override suspend fun getFlaggedApps(): List<IncompatibleApp> {
+        return mockAutoExcludeMap.filter { !it.value }.map { it.key }
     }
 
-    override fun markAppAsShown(app: FlaggedApp) {
+    override fun markAppAsFlagged(app: IncompatibleApp) {
     }
 
     override fun isAppMarkedAsNotCompatible(appPackage: String): Boolean {
-        return when (appPackage) {
-            "com.openai.chatgpt" -> true
-            "com.google.android.projection.gearhead" -> true
-            else -> false
+        return mockAutoExcludeMap.keys.any { it.appPackage == appPackage }
+    }
+
+    override suspend fun getAllInstalledIncompatibleApps(): List<IncompatibleApp> {
+        return mockAutoExcludeMap.keys.toList()
+    }
+
+    override suspend fun getAllInstalledProtectedIncompatibleApps(): List<IncompatibleApp> {
+        return mockAutoExcludeMap.filter {
+            !netPExclusionListRepository.getExcludedAppPackages().contains(it.key.appPackage)
+        }.map {
+            it.key
         }
     }
 }

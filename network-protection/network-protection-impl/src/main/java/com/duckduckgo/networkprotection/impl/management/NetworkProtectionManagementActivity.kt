@@ -51,6 +51,7 @@ import com.duckduckgo.networkprotection.api.NetworkProtectionScreens.NetworkProt
 import com.duckduckgo.networkprotection.api.NetworkProtectionScreens.NetworkProtectionManagementScreenNoParams
 import com.duckduckgo.networkprotection.impl.R
 import com.duckduckgo.networkprotection.impl.autoexclude.VpnAutoExcludePromptFragment
+import com.duckduckgo.networkprotection.impl.autoexclude.VpnAutoExcludePromptFragment.Companion.Trigger.NEW_FLAGGED_APP
 import com.duckduckgo.networkprotection.impl.databinding.ActivityNetpManagementBinding
 import com.duckduckgo.networkprotection.impl.management.NetworkProtectionManagementViewModel.AlertState.None
 import com.duckduckgo.networkprotection.impl.management.NetworkProtectionManagementViewModel.AlertState.ShowAlwaysOnLockdownEnabled
@@ -494,7 +495,7 @@ class NetworkProtectionManagementActivity : DuckDuckGoActivity() {
     private fun showAutoExcludeDialog() {
         dismissPromotionDialog()
 
-        VpnAutoExcludePromptFragment.instance()
+        VpnAutoExcludePromptFragment.instance(NEW_FLAGGED_APP)
             .show(supportFragmentManager, TAG_PROMOTION_DIALOG)
     }
 

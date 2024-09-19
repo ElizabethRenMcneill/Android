@@ -76,7 +76,8 @@ class VpnAutoExcludePromptFragment private constructor() : BottomSheetDialogFrag
 
     override fun onStart() {
         super.onStart()
-        viewModel.onPromptShown()
+        val trigger = requireArguments().getSerializable(KEY_PROMPT_TRIGGER) as Trigger
+        viewModel.onPromptShown(trigger)
     }
 
     private fun observerViewModel(binding: DialogAutoExcludeBinding) {
@@ -91,7 +92,7 @@ class VpnAutoExcludePromptFragment private constructor() : BottomSheetDialogFrag
         viewState: ViewState,
     ) {
         binding.apply {
-            viewState.flaggedApps.forEach { app ->
+            viewState.incompatibleApps.forEach { app ->
                 val appCheckBox = CheckBox(this.root.context)
                 appCheckBox.text = app.appName
                 appCheckBox.isChecked = true
@@ -114,12 +115,6 @@ class VpnAutoExcludePromptFragment private constructor() : BottomSheetDialogFrag
         }
     }
 
-    companion object {
-        fun instance(): VpnAutoExcludePromptFragment {
-            return VpnAutoExcludePromptFragment()
-        }
-    }
-
     private fun CheckBox.format() {
         setTextAppearance(Typography.getTextAppearanceStyle(Body1))
         setTextColor(
@@ -128,5 +123,22 @@ class VpnAutoExcludePromptFragment private constructor() : BottomSheetDialogFrag
                 TextType.getTextColorStateList(Secondary),
             ),
         )
+    }
+
+    companion object {
+        enum class Trigger {
+            NEW_FLAGGED_APP,
+            INCOMPATIBLE_APP_MANUALLY_EXCLUDED,
+        }
+
+        private const val KEY_PROMPT_TRIGGER = "KEY_PROMPT_TRIGGER"
+
+        fun instance(trigger: Trigger): VpnAutoExcludePromptFragment {
+            return VpnAutoExcludePromptFragment().apply {
+                val args = Bundle()
+                args.putSerializable(KEY_PROMPT_TRIGGER, trigger)
+                arguments = args
+            }
+        }
     }
 }
